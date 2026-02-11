@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository
+
+This project is hosted on GitHub at https://github.com/jmantheitguy/PHPIPAM-Custom (public). After making changes, commit and push to the remote.
+
 ## Project Overview
 
 Docker-based IP Address Management (IPAM) system combining PHPIPAM 1.6.0 with Active Directory authentication, network scanning (ICMP/ARP/NDP), and a network intelligence pipeline (DNS reconciliation, DHCP correlation, change detection, IP conflict detection, utilization tracking).
@@ -12,7 +16,11 @@ Docker-based IP Address Management (IPAM) system combining PHPIPAM 1.6.0 with Ac
 # Initial setup (generates passwords, SSL certs, downloads PHPIPAM v1.6.0)
 ./setup.sh
 
-# Start/stop all containers
+# Start/stop (convenience wrappers that wait for health checks and verify network isolation)
+./start.sh
+./stop.sh
+
+# Or directly with docker compose
 docker compose up -d
 docker compose down
 
@@ -59,11 +67,15 @@ nginx:443 ──► php-fpm:9000 ──► mysql:3306 ◄─────── s
 
 The scanner has **no access** to `ipam-network` and cannot be reached from outside. It communicates with mysql and redis only via `scanner-internal`.
 
+### Configuration Deployment Model
+
+The `phpipam/` directory is **gitignored** — it is downloaded at setup time by `setup.sh` (git clone of PHPIPAM v1.6.0). The tracked configuration lives in `config/phpipam/` and must be copied into `phpipam/` for the application to use it. The `phpipam/` directory is bind-mounted into both the php-fpm and nginx containers.
+
 ### Key Configuration Files
 
 - `docker-compose.yml` — Container orchestration (no version field, Compose v5+)
 - `.env` — Credentials and config (generated from `.env.example` by `setup.sh`)
-- `config/phpipam/config.php` — PHPIPAM database, Redis, AD, and custom subpage registration
+- `config/phpipam/config.php` — PHPIPAM database, Redis, AD, and custom subpage registration (tracked source; deployed to `phpipam/config.php`)
 - `config/phpipam/ldap_settings.php` — AD/LDAP authentication helpers (`ldap_authenticate_user()`, `ldap_is_admin()`, `ldap_get_role()`)
 - `docker/scanner/scanner.py` — Python scanner service main loop
 - `docker/scanner/collectors/` — 6 Python collector modules (see Scanner section)
@@ -82,6 +94,8 @@ The scanner is a long-running Python service with two operating modes:
 
 1. **Scheduled polling** — Uses the `schedule` library to run periodic jobs (subnet scans every `SCAN_INTERVAL` seconds, AD sync, DNS checks, DHCP sync, daily utilization aggregation)
 2. **Redis queue processing** — Polls Redis lists on a 0.1s loop for on-demand scan/ping/sync requests
+
+**Python dependencies** (`docker/scanner/requirements.txt`): `mysql-connector-python`, `redis`, `scapy`, `python-nmap`, `schedule`, `python-ldap`, `dnspython`, `requests`.
 
 **Core scanning flow:** `ping_host(ip)` executes system `ping`, parses response time, runs `arp -n` for MAC, `socket.gethostbyaddr()` for reverse DNS. `scan_subnet(cidr, scan_id)` fans out to `ThreadPoolExecutor(max_workers=SCAN_CONCURRENT)`.
 

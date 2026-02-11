@@ -1,0 +1,10 @@
+# Python dependencies for subnet scanner
+mysql-connector-python>=8.0.0
+redis>=4.0.0
+scapy>=2.5.0
+python-nmap>=0.7.0
+ipaddress>=1.0.0
+schedule>=1.2.0
+python-ldap>=3.4.0
+dnspython>=2.4.0
+requests>=2.28.0

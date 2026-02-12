@@ -7,7 +7,7 @@ echo "Starting IPAM Subnet Scanner..."
 echo "Waiting for MySQL..."
 max_tries=30
 counter=0
-until mysql -h"${MYSQL_HOST}" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SELECT 1" > /dev/null 2>&1; do
+until python3 -c "import mysql.connector; mysql.connector.connect(host='${MYSQL_HOST}', user='${MYSQL_USER}', password='${MYSQL_PASSWORD}', database='${MYSQL_DATABASE}')" > /dev/null 2>&1; do
     counter=$((counter + 1))
     if [ $counter -gt $max_tries ]; then
         echo "Error: MySQL not available after $max_tries attempts"

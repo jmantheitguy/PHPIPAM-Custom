@@ -103,7 +103,7 @@ class RedisConnection:
 
 
 # Initialize collectors
-ad_collector = ADCollector(DatabaseConnection, ping_host=None, mysql_config=MYSQL_CONFIG)
+ad_collector = ADCollector(DatabaseConnection, ping_func=None, mysql_config=MYSQL_CONFIG)
 dns_reconciler = DNSReconciler(DatabaseConnection, MYSQL_CONFIG)
 dhcp_collector = DHCPCollector(DatabaseConnection, MYSQL_CONFIG)
 utilization_collector = UtilizationCollector(DatabaseConnection, MYSQL_CONFIG)
@@ -324,10 +324,12 @@ def process_scan_queue():
 
                     # Network Intelligence: post-scan processing
                     try:
-                        change_detector.save_current_state(
-                            subnet_id, results, scan_id)
+                        # Compare BEFORE saving so get_previous_state
+                        # returns the prior scan, not the current one
                         change_detector.compare_scan_results(
                             subnet_id, results)
+                        change_detector.save_current_state(
+                            subnet_id, results, scan_id)
                         conflict_detector.process_scan_results(
                             subnet_id, subnet_cidr, results)
                         utilization_collector.capture_snapshot(
@@ -502,8 +504,9 @@ def scheduled_subnet_scan():
             cursor = conn.cursor(dictionary=True)
 
             # Get subnets with scanning enabled
+            # INET_NTOA converts the stored integer back to dotted notation
             cursor.execute("""
-                SELECT id, subnet, mask
+                SELECT id, INET_NTOA(subnet) as subnet, mask
                 FROM subnets
                 WHERE scanAgent = 1
                 AND isFolder = 0

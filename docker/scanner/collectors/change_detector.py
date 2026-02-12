@@ -195,7 +195,7 @@ class ChangeDetector:
                         continue
 
                     cursor.execute("""
-                        SELECT DISTINCT subnet_id, ip_address
+                        SELECT subnet_id, ip_address
                         FROM network_state_history
                         WHERE mac_address = %s
                         AND subnet_id != %s

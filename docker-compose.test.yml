@@ -1,0 +1,347 @@
+# Docker Compose override for test environment with mock devices
+# Usage: docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+# Or:    ./scripts/test-env.sh start
+#
+# Creates 30 mock devices across 3 isolated subnets.
+# See docs/test-devices.md for the full device inventory.
+
+services:
+  # Connect scanner to all three test subnets
+  subnet-scanner:
+    networks:
+      - scanner-internal
+      - test-servers
+      - test-workstations
+      - test-iot
+
+  # =====================================================================
+  # SUBNET 1: 172.30.1.0/24 — Servers & Infrastructure (10 devices)
+  # =====================================================================
+
+  mock-gw-core:
+    image: alpine:latest
+    container_name: mock-gw-core
+    hostname: gw-core-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.2
+    restart: unless-stopped
+
+  mock-web-01:
+    image: alpine:latest
+    container_name: mock-web-srv-01
+    hostname: web-srv-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.10
+    restart: unless-stopped
+
+  mock-web-02:
+    image: alpine:latest
+    container_name: mock-web-srv-02
+    hostname: web-srv-02
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.11
+    restart: unless-stopped
+
+  mock-db-01:
+    image: alpine:latest
+    container_name: mock-db-srv-01
+    hostname: db-srv-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.20
+    restart: unless-stopped
+
+  mock-db-02:
+    image: alpine:latest
+    container_name: mock-db-srv-02
+    hostname: db-srv-02
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.21
+    restart: unless-stopped
+
+  mock-app-01:
+    image: alpine:latest
+    container_name: mock-app-srv-01
+    hostname: app-srv-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.30
+    restart: unless-stopped
+
+  mock-file-01:
+    image: alpine:latest
+    container_name: mock-file-srv-01
+    hostname: file-srv-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.40
+    restart: unless-stopped
+
+  mock-mail-01:
+    image: alpine:latest
+    container_name: mock-mail-srv-01
+    hostname: mail-srv-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.50
+    restart: unless-stopped
+
+  mock-dns-01:
+    image: alpine:latest
+    container_name: mock-dns-srv-01
+    hostname: dns-srv-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.60
+    restart: unless-stopped
+
+  mock-dc-01:
+    image: alpine:latest
+    container_name: mock-dc-01
+    hostname: dc-01
+    command: sleep infinity
+    networks:
+      test-servers:
+        ipv4_address: 172.30.1.70
+    restart: unless-stopped
+
+  # =====================================================================
+  # SUBNET 2: 172.30.2.0/24 — Workstations & End Users (10 devices)
+  # =====================================================================
+
+  mock-gw-floor2:
+    image: alpine:latest
+    container_name: mock-gw-floor2
+    hostname: gw-floor2
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.2
+    restart: unless-stopped
+
+  mock-ws-01:
+    image: alpine:latest
+    container_name: mock-ws-pc-01
+    hostname: ws-pc-01
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.100
+    restart: unless-stopped
+
+  mock-ws-02:
+    image: alpine:latest
+    container_name: mock-ws-pc-02
+    hostname: ws-pc-02
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.101
+    restart: unless-stopped
+
+  mock-ws-03:
+    image: alpine:latest
+    container_name: mock-ws-pc-03
+    hostname: ws-pc-03
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.102
+    restart: unless-stopped
+
+  mock-ws-04:
+    image: alpine:latest
+    container_name: mock-ws-pc-04
+    hostname: ws-pc-04
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.103
+    restart: unless-stopped
+
+  mock-ws-05:
+    image: alpine:latest
+    container_name: mock-ws-pc-05
+    hostname: ws-pc-05
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.104
+    restart: unless-stopped
+
+  mock-laptop-01:
+    image: alpine:latest
+    container_name: mock-ws-laptop-01
+    hostname: ws-laptop-01
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.110
+    restart: unless-stopped
+
+  mock-laptop-02:
+    image: alpine:latest
+    container_name: mock-ws-laptop-02
+    hostname: ws-laptop-02
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.111
+    restart: unless-stopped
+
+  mock-conf-01:
+    image: alpine:latest
+    container_name: mock-conf-room-01
+    hostname: conf-room-01
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.200
+    restart: unless-stopped
+
+  mock-conf-02:
+    image: alpine:latest
+    container_name: mock-conf-room-02
+    hostname: conf-room-02
+    command: sleep infinity
+    networks:
+      test-workstations:
+        ipv4_address: 172.30.2.201
+    restart: unless-stopped
+
+  # =====================================================================
+  # SUBNET 3: 172.30.3.0/24 — IoT & Facilities (10 devices)
+  # =====================================================================
+
+  mock-gw-iot:
+    image: alpine:latest
+    container_name: mock-gw-iot
+    hostname: gw-iot
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.2
+    restart: unless-stopped
+
+  mock-printer-f1:
+    image: alpine:latest
+    container_name: mock-printer-floor1
+    hostname: printer-floor1
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.10
+    restart: unless-stopped
+
+  mock-printer-f2:
+    image: alpine:latest
+    container_name: mock-printer-floor2
+    hostname: printer-floor2
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.11
+    restart: unless-stopped
+
+  mock-cam-lobby:
+    image: alpine:latest
+    container_name: mock-cam-lobby
+    hostname: cam-lobby
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.20
+    restart: unless-stopped
+
+  mock-cam-parking:
+    image: alpine:latest
+    container_name: mock-cam-parking
+    hostname: cam-parking
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.21
+    restart: unless-stopped
+
+  mock-cam-server-rm:
+    image: alpine:latest
+    container_name: mock-cam-server-room
+    hostname: cam-server-room
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.22
+    restart: unless-stopped
+
+  mock-switch-01:
+    image: alpine:latest
+    container_name: mock-switch-mgmt-01
+    hostname: switch-mgmt-01
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.30
+    restart: unless-stopped
+
+  mock-switch-02:
+    image: alpine:latest
+    container_name: mock-switch-mgmt-02
+    hostname: switch-mgmt-02
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.31
+    restart: unless-stopped
+
+  mock-hvac:
+    image: alpine:latest
+    container_name: mock-hvac-controller
+    hostname: hvac-controller
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.40
+    restart: unless-stopped
+
+  mock-badge:
+    image: alpine:latest
+    container_name: mock-badge-reader-01
+    hostname: badge-reader-01
+    command: sleep infinity
+    networks:
+      test-iot:
+        ipv4_address: 172.30.3.50
+    restart: unless-stopped
+
+networks:
+  test-servers:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.1.0/24
+  test-workstations:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.2.0/24
+  test-iot:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.3.0/24
